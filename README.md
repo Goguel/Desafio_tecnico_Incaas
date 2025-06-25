@@ -72,6 +72,18 @@ A seguir, a lista de todos os requisitos solicitados e como foram implementados.
 
 ---
 
+## 🏆 Melhorias Adicionais (Extras)
+
+Além dos requisitos solicitados, decidi implementar por conta própria a dockerização do projeto. Considero essencial que um projeto backend esteja dockerizado para facilitar e agilizar o processo de desenvolvimento, especialmente quando o projeto escala muito.
+
+* **[📦] Suporte a Docker:**
+  * **O que foi feito:** A aplicação foi dockerizada utilizando um `Dockerfile` multi-estágio otimizado. Este processo gera uma imagem Docker leve e segura, pronta para produção.
+  * **Por quê:** Para garantir que a aplicação possa ser executada de forma consistente em qualquer ambiente que suporte Docker, facilitando o processo de build, deploy e escalabilidade, além de isolar a aplicação e suas dependências.
+  * **Como usar:**
+    1. Construa a imagem Docker na raiz do projeto: `docker build -t gerenciador-processos .`
+    2. Execute o contêiner: `docker run -p 8080:8080 gerenciador-processos`
+---
+
 ## 🚀 Como Executar o Projeto
 
 ### Pré-requisitos
