@@ -7,6 +7,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import java.util.Date;
 import javax.crypto.SecretKey;
@@ -25,13 +26,18 @@ public class TokenService {
     }
 
     public String gerarToken(Authentication authentication) {
-        Usuario logado = (Usuario) authentication.getPrincipal();
+        UserDetails principal = (UserDetails) authentication.getPrincipal();
+
+        // Agora, não importa se o objeto é um 'User' do Spring ou um 'Usuario' do projeto,
+        // ambos têm o método getUsername() por causa da interface.
+        String username = principal.getUsername();
+
         Date hoje = new Date();
         Date dataExpiracao = new Date(hoje.getTime() + expiration);
 
         return Jwts.builder()
                 .setIssuer("API Gerenciador de Processos")
-                .setSubject(logado.getUsername())
+                .setSubject(username)
                 .setIssuedAt(hoje)
                 .setExpiration(dataExpiracao)
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)

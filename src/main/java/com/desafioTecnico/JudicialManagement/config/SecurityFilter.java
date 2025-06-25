@@ -1,5 +1,6 @@
 package com.desafioTecnico.JudicialManagement.config;
 
+import com.desafioTecnico.JudicialManagement.model.Usuario;
 import com.desafioTecnico.JudicialManagement.service.TokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -8,7 +9,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -28,10 +28,10 @@ public class SecurityFilter extends OncePerRequestFilter {
         if (token != null) {
             String username = tokenService.getUsernameFromToken(token);
 
-            UserDetails user = new User(username, "", Collections.emptyList());
+            UserDetails usuarioAutenticado = new Usuario(username, null);
 
             // Informa ao Spring que o usuário está autenticado para esta requisição
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(usuarioAutenticado, null, usuarioAutenticado.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
         filterChain.doFilter(request, response);
