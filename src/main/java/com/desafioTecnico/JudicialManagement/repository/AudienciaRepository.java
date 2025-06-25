@@ -14,5 +14,5 @@ public interface AudienciaRepository extends JpaRepository<Audiencia, Long> {
     boolean existsByProcesso_VaraAndLocalAndDataHora(String vara, String local, LocalDateTime dataHora);
 
     @Query("SELECT a FROM Audiencia a WHERE a.processo.comarca = :comarca AND a.dataHora >= :inicioDoDia AND a.dataHora <= :fimDoDia")
-    List<Audiencia> findByComarcaAndData(String comarca, LocalDateTime inicioDoDia, LocalDateTime fimDoDia);
+    List<Audiencia> findByProcesso_ComarcaAndDataHoraBetween(String comarca, LocalDateTime inicioDoDia, LocalDateTime fimDoDia);
 }

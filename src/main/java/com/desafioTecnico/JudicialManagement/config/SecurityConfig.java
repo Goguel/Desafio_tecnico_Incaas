@@ -49,7 +49,6 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    // Para o desafio, vamos usar um usuário em memória.
     @Bean
     public UserDetailsService userDetailsService() {
         UserDetails user = User.builder()

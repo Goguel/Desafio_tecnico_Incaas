@@ -1,5 +1,7 @@
 package com.desafioTecnico.JudicialManagement.service;
 
+import com.desafioTecnico.JudicialManagement.dto.AudienciaRequestDTO;
+import com.desafioTecnico.JudicialManagement.dto.AudienciaResponseDTO;
 import com.desafioTecnico.JudicialManagement.exception.RegraNegocioException;
 import com.desafioTecnico.JudicialManagement.model.Audiencia;
 import com.desafioTecnico.JudicialManagement.model.Processo;
@@ -40,31 +42,40 @@ class AudienciaServiceTest {
     void deveAgendarAudiencia_QuandoTudoEstiverCorreto() {
         // Arrange (Preparação)
         long processoId = 1L;
+        LocalDateTime proximaSegunda = LocalDateTime.now().with(DayOfWeek.MONDAY).plusWeeks(1).withHour(10).withMinute(0);
+
+        AudienciaRequestDTO requestDTO = new AudienciaRequestDTO(
+                proximaSegunda,
+                TipoAudiencia.INSTRUCAO,
+                "Sala 1"
+        );
+
         Processo processoAtivo = new Processo();
         processoAtivo.setId(processoId);
         processoAtivo.setStatus(StatusProcesso.ATIVO);
         processoAtivo.setVara("1ª Vara");
 
-        Audiencia novaAudiencia = new Audiencia();
-        // Garante que a data seja em um dia útil futuro (ex: próxima segunda-feira às 10h)
-        LocalDateTime proximaSegunda = LocalDateTime.now().with(DayOfWeek.MONDAY).plusWeeks(1).withHour(10).withMinute(0);
-        novaAudiencia.setDataHora(proximaSegunda);
-        novaAudiencia.setLocal("Sala 1");
-        novaAudiencia.setTipoAudiencia(TipoAudiencia.INSTRUCAO);
+        // O save do repositório ainda trabalha com a entidade Audiencia
+        Audiencia audienciaSalva = new Audiencia();
+        audienciaSalva.setId(100L); // Simula o ID gerado pelo banco
+        audienciaSalva.setProcesso(processoAtivo);
+        audienciaSalva.setDataHora(requestDTO.dataHora());
+        audienciaSalva.setTipoAudiencia(requestDTO.tipoAudiencia());
+        audienciaSalva.setLocal(requestDTO.local());
 
         // Configura os mocks
         when(processoRepository.findById(processoId)).thenReturn(Optional.of(processoAtivo));
         when(audienciaRepository.existsByProcesso_VaraAndLocalAndDataHora(anyString(), anyString(), any(LocalDateTime.class))).thenReturn(false);
-        // Quando o save for chamado, retorna a própria audiência para verificação
-        when(audienciaRepository.save(any(Audiencia.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(audienciaRepository.save(any(Audiencia.class))).thenReturn(audienciaSalva);
 
         // Act (Ação)
-        Audiencia audienciaAgendada = audienciaService.agendarAudiencia(processoId, novaAudiencia);
+        AudienciaResponseDTO responseDTO = audienciaService.agendarAudiencia(processoId, requestDTO);
 
         // Assert (Verificação)
-        assertNotNull(audienciaAgendada);
-        assertEquals(processoAtivo, audienciaAgendada.getProcesso());
-        verify(audienciaRepository, times(1)).save(novaAudiencia); // Verifica se o save foi chamado exatamente 1 vez.
+        assertNotNull(responseDTO);
+        assertEquals(100L, responseDTO.id()); // Verifica se o DTO de resposta tem os dados corretos
+        assertEquals("Sala 1", responseDTO.local());
+        verify(audienciaRepository, times(1)).save(any(Audiencia.class));
     }
 
     // --- Testes das Regras de Negócio (Caminhos de Exceção) ---
@@ -78,32 +89,41 @@ class AudienciaServiceTest {
         processoArquivado.setId(processoId);
         processoArquivado.setStatus(StatusProcesso.ARQUIVADO);
 
+        AudienciaRequestDTO dto = new AudienciaRequestDTO(LocalDateTime.now().plusDays(1), TipoAudiencia.JULGAMENTO, "Local");
+
         when(processoRepository.findById(processoId)).thenReturn(Optional.of(processoArquivado));
 
         // Act & Assert
         RegraNegocioException exception = assertThrows(RegraNegocioException.class, () -> {
-            audienciaService.agendarAudiencia(processoId, new Audiencia());
+            audienciaService.agendarAudiencia(processoId, dto);
         });
 
         assertEquals("Não é possível agendar audiências para processos arquivados ou suspensos.", exception.getMessage());
-        verify(audienciaRepository, never()).save(any()); // Garante que NUNCA tentamos salvar
+        verify(audienciaRepository, never()).save(any());
     }
 
     @Test
     @DisplayName("Não deve agendar audiência para um processo SUSPENSO")
     void naoDeveAgendar_QuandoProcessoSuspenso() {
-        // Arrange
+        // Arrange (Preparação)
         long processoId = 1L;
         Processo processoSuspenso = new Processo();
         processoSuspenso.setId(processoId);
+        // A única diferença do teste anterior: o status é SUSPENSO
         processoSuspenso.setStatus(StatusProcesso.SUSPENSO);
+
+        AudienciaRequestDTO dto = new AudienciaRequestDTO(LocalDateTime.now().plusDays(5), TipoAudiencia.CONCILIACAO, "Online");
 
         when(processoRepository.findById(processoId)).thenReturn(Optional.of(processoSuspenso));
 
         // Act & Assert
-        assertThrows(RegraNegocioException.class, () -> {
-            audienciaService.agendarAudiencia(processoId, new Audiencia());
+        RegraNegocioException exception = assertThrows(RegraNegocioException.class, () -> {
+            audienciaService.agendarAudiencia(processoId, dto);
         });
+
+        assertEquals("Não é possível agendar audiências para processos arquivados ou suspensos.", exception.getMessage());
+
+        verify(audienciaRepository, never()).save(any());
     }
 
     @Test
@@ -115,15 +135,14 @@ class AudienciaServiceTest {
         processoAtivo.setId(processoId);
         processoAtivo.setStatus(StatusProcesso.ATIVO);
 
-        Audiencia audienciaNoSabado = new Audiencia();
         LocalDateTime proximoSabado = LocalDateTime.now().with(DayOfWeek.SATURDAY).plusWeeks(1);
-        audienciaNoSabado.setDataHora(proximoSabado);
+        AudienciaRequestDTO dtoNoSabado = new AudienciaRequestDTO(proximoSabado, TipoAudiencia.CONCILIACAO, "Online");
 
         when(processoRepository.findById(processoId)).thenReturn(Optional.of(processoAtivo));
 
         // Act & Assert
         RegraNegocioException exception = assertThrows(RegraNegocioException.class, () -> {
-            audienciaService.agendarAudiencia(processoId, audienciaNoSabado);
+            audienciaService.agendarAudiencia(processoId, dtoNoSabado);
         });
 
         assertEquals("Audiências só podem ser marcadas em dias úteis.", exception.getMessage());
@@ -139,18 +158,15 @@ class AudienciaServiceTest {
         processoAtivo.setStatus(StatusProcesso.ATIVO);
         processoAtivo.setVara("1ª Vara");
 
-        Audiencia novaAudiencia = new Audiencia();
         LocalDateTime proximaTerca = LocalDateTime.now().with(DayOfWeek.TUESDAY).plusWeeks(1).withHour(14);
-        novaAudiencia.setDataHora(proximaTerca);
-        novaAudiencia.setLocal("Sala 2");
+        AudienciaRequestDTO dto = new AudienciaRequestDTO(proximaTerca, TipoAudiencia.JULGAMENTO, "Sala 2");
 
         when(processoRepository.findById(processoId)).thenReturn(Optional.of(processoAtivo));
-        // Simula que a query de verificação de existência retornou 'true'
         when(audienciaRepository.existsByProcesso_VaraAndLocalAndDataHora("1ª Vara", "Sala 2", proximaTerca)).thenReturn(true);
 
         // Act & Assert
         RegraNegocioException exception = assertThrows(RegraNegocioException.class, () -> {
-            audienciaService.agendarAudiencia(processoId, novaAudiencia);
+            audienciaService.agendarAudiencia(processoId, dto);
         });
 
         assertEquals("Já existe uma audiência agendada para esta vara, local, data e hora.", exception.getMessage());

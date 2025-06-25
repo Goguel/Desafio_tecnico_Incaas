@@ -1,5 +1,8 @@
 package com.desafioTecnico.JudicialManagement.controller;
 
+import com.desafioTecnico.JudicialManagement.dto.AgendaResponseDTO;
+import com.desafioTecnico.JudicialManagement.dto.AudienciaRequestDTO;
+import com.desafioTecnico.JudicialManagement.dto.AudienciaResponseDTO;
 import com.desafioTecnico.JudicialManagement.model.Audiencia;
 import com.desafioTecnico.JudicialManagement.service.AudienciaService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,20 +28,20 @@ public class AudienciaController {
     @PostMapping("/processo/{processoId}")
     @Operation(summary = "Agenda uma nova audiência para um processo")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<Audiencia> agendarAudiencia(
+    public ResponseEntity<AudienciaResponseDTO> agendarAudiencia(
             @PathVariable Long processoId,
-            @Valid @RequestBody Audiencia audiencia) {
-        Audiencia novaAudiencia = audienciaService.agendarAudiencia(processoId, audiencia);
-        return new ResponseEntity<>(novaAudiencia, HttpStatus.CREATED);
+            @Valid @RequestBody AudienciaRequestDTO dto) { // Recebe o DTO
+        AudienciaResponseDTO novaAudiencia = audienciaService.agendarAudiencia(processoId, dto);
+        return new ResponseEntity<>(novaAudiencia, HttpStatus.CREATED); // Retorna o DTO
     }
 
     @GetMapping("/agenda")
     @Operation(summary = "Consulta a agenda de audiências de uma comarca em um dia específico")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<List<Audiencia>> consultarAgenda(
-            @RequestParam String comarca,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dia) {
-        List<Audiencia> agenda = audienciaService.consultarAgendaDaComarca(comarca, dia);
+    public ResponseEntity<List<AgendaResponseDTO>> consultarAgenda( // Retorna uma lista do DTO de agenda
+                                                                    @RequestParam String comarca,
+                                                                    @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dia) {
+        List<AgendaResponseDTO> agenda = audienciaService.consultarAgendaDaComarca(comarca, dia);
         return ResponseEntity.ok(agenda);
     }
 }
