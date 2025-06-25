@@ -131,6 +131,11 @@ Para todos os outros endpoints, você deve incluir o token no cabeçalho da requ
 * **Tipo de Autorização:** `Bearer Token`
 * **Header:** `Authorization: Bearer <seu_token_copiado_aqui>`
 
+A imagem abaixo mostra onde deve-se colocar o tipo de autorização(Auth Type) e o token gerado no Postman. 
+Com o token e o Auth Type corretos, pode-se fazer todas as outras requisições normalmente.
+
+![](./docs/images/exemplo-postman-auth.jpg)
+
 **Exemplo: Criando um novo processo**
 
 * **Endpoint:** `POST /api/v1/processos`
