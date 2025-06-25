@@ -6,6 +6,7 @@ import com.desafioTecnico.JudicialManagement.model.Processo;
 import com.desafioTecnico.JudicialManagement.model.StatusProcesso;
 import com.desafioTecnico.JudicialManagement.service.ProcessoService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ public class ProcessoController {
 
     @PostMapping
     @Operation(summary = "Cria um novo processo judicial")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<ProcessoResponseDTO> criarProcesso(@Valid @RequestBody ProcessoRequestDTO processoDTO) {
         ProcessoResponseDTO novoProcesso = processoService.criarProcesso(processoDTO);
         return new ResponseEntity<>(novoProcesso, HttpStatus.CREATED);
@@ -31,6 +33,7 @@ public class ProcessoController {
 
     @GetMapping
     @Operation(summary = "Lista todos os processos com filtros opcionais")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<List<Processo>> listarProcessos(
             @RequestParam(required = false) StatusProcesso status,
             @RequestParam(required = false) String comarca) {

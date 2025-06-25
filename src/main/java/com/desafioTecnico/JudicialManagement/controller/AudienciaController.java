@@ -3,6 +3,7 @@ package com.desafioTecnico.JudicialManagement.controller;
 import com.desafioTecnico.JudicialManagement.model.Audiencia;
 import com.desafioTecnico.JudicialManagement.service.AudienciaService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ public class AudienciaController {
 
     @PostMapping("/processo/{processoId}")
     @Operation(summary = "Agenda uma nova audiência para um processo")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Audiencia> agendarAudiencia(
             @PathVariable Long processoId,
             @Valid @RequestBody Audiencia audiencia) {
@@ -32,6 +34,7 @@ public class AudienciaController {
 
     @GetMapping("/agenda")
     @Operation(summary = "Consulta a agenda de audiências de uma comarca em um dia específico")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<List<Audiencia>> consultarAgenda(
             @RequestParam String comarca,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dia) {
