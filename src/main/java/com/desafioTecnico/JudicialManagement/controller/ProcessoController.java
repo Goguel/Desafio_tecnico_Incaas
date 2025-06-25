@@ -1,5 +1,7 @@
 package com.desafioTecnico.JudicialManagement.controller;
 
+import com.desafioTecnico.JudicialManagement.dto.ProcessoRequestDTO;
+import com.desafioTecnico.JudicialManagement.dto.ProcessoResponseDTO;
 import com.desafioTecnico.JudicialManagement.model.Processo;
 import com.desafioTecnico.JudicialManagement.model.StatusProcesso;
 import com.desafioTecnico.JudicialManagement.service.ProcessoService;
@@ -22,8 +24,8 @@ public class ProcessoController {
 
     @PostMapping
     @Operation(summary = "Cria um novo processo judicial")
-    public ResponseEntity<Processo> criarProcesso(@Valid @RequestBody Processo processo) {
-        Processo novoProcesso = processoService.criarProcesso(processo);
+    public ResponseEntity<ProcessoResponseDTO> criarProcesso(@Valid @RequestBody ProcessoRequestDTO processoDTO) {
+        ProcessoResponseDTO novoProcesso = processoService.criarProcesso(processoDTO);
         return new ResponseEntity<>(novoProcesso, HttpStatus.CREATED);
     }
 
