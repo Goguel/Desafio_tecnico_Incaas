@@ -39,7 +39,7 @@ public class AudienciaService {
         }
 
         // Regra: Não permitir sobreposição de audiências
-        boolean sobreposicao = audienciaRepository.existsByVaraAndLocalAndDataHora(
+        boolean sobreposicao = audienciaRepository.existsByProcesso_VaraAndLocalAndDataHora(
                 processo.getVara(), audiencia.getLocal(), dataHoraAudiencia);
         if (sobreposicao) {
             throw new RegraNegocioException("Já existe uma audiência agendada para esta vara, local, data e hora.");
