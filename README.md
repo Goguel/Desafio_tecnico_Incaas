@@ -86,6 +86,9 @@ Além dos requisitos solicitados, decidi implementar por conta própria a docker
 
 ## 🚀 Como Executar o Projeto
 
+#### Forma alternativa
+* Utilizar o docker através dos dois comandos apresentados acima.
+  
 ### Pré-requisitos
 * Java (JDK) 17 ou superior.
 * Maven 3.8 ou superior.
