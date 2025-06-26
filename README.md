@@ -85,15 +85,12 @@ Além dos requisitos solicitados, decidi implementar por conta própria a docker
 ---
 
 ## 🚀 Como Executar o Projeto
-
-#### Forma alternativa
-* Utilizar o docker através dos dois comandos apresentados acima.
   
 ### Pré-requisitos
 * Java (JDK) 17 ou superior.
 * Maven 3.8 ou superior.
 
-### Passos para Execução
+### Passos para Execução Local
 1.  Clone este repositório.
 2.  Abra um terminal na pasta raiz do projeto.
 3.  Execute o seguinte comando Maven:
@@ -102,6 +99,15 @@ Além dos requisitos solicitados, decidi implementar por conta própria a docker
     ```
 A aplicação iniciará e estará disponível em `http://localhost:8080`.
 
+### Passos para Execução com Docker (Indicado)
+1.  Construa a imagem Docker na raiz do projeto:
+    ```bash
+    docker build -t judicialmanagement .
+    ```
+2.  Execute o contêiner:
+    ```bash
+    docker run -p 8080:8080 --name api-judicial judicialmanagement
+    ```
 ## 🧪 Como Executar os Testes
 
 Para rodar a suíte de testes unitários e garantir a integridade das regras de negócio, execute o seguinte comando na raiz do projeto:
@@ -151,7 +157,7 @@ Com o token e o Auth Type corretos, pode-se fazer todas as outras requisições 
 
 ![](./docs/images/exemplo-postman-auth.jpg)
 
-**Exemplo: Criando um novo processo**
+**Exemplo 1: Criando um novo processo**
 
 * **Endpoint:** `POST /api/v1/processos`
 * **Authorization Header:** `Bearer eyJhbGciOiJIUzI1NiJ9...`
@@ -165,6 +171,33 @@ Com o token e o Auth Type corretos, pode-se fazer todas as outras requisições 
       "status": "ATIVO"
     }
     ```
+
+#### Exemplo 2: Listando e filtrando processos
+
+* **Endpoint:** `GET /api/v1/processos`
+* **Para listar todos:** `GET http://localhost:8080/api/v1/processos`
+* **Para filtrar por status:** `GET http://localhost:8080/api/v1/processos?status=ATIVO`
+* **Para filtrar por status e comarca:** `GET http://localhost:8080/api/v1/processos?status=ATIVO&comarca=Natal`
+
+#### Exemplo 3: Agendando uma nova audiência
+
+* **Endpoint:** `POST /api/v1/audiencias/processo/{processoId}`
+  * Substitua `{processoId}` pelo ID de um processo `ATIVO` existente (ex: 1).
+  * URL final de exemplo: `http://localhost:8080/api/v1/audiencias/processo/1`
+* **Body (raw/JSON):**
+    ```json
+    {
+      "dataHora": "2025-09-22T14:30:00",
+      "tipoAudiencia": "CONCILIACAO",
+      "local": "Sala de Audiências 05, Fórum Central"
+    }
+    ```
+
+#### Exemplo 4: Consultando a agenda do dia
+
+* **Endpoint:** `GET /api/v1/audiencias/agenda`
+* **Exemplo de URL com parâmetros:** `http://localhost:8080/api/v1/audiencias/agenda?comarca=Natal&dia=2025-09-22`
+
 
 ## 🗄️ Acesso ao Banco de Dados H2
 

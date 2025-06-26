@@ -6,6 +6,8 @@ import com.desafioTecnico.JudicialManagement.dto.AudienciaResponseDTO;
 import com.desafioTecnico.JudicialManagement.model.Audiencia;
 import com.desafioTecnico.JudicialManagement.service.AudienciaService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -27,7 +29,13 @@ public class AudienciaController {
 
     @PostMapping("/processo/{processoId}")
     @Operation(summary = "Agenda uma nova audiência para um processo")
-    @SecurityRequirement(name = "bearerAuth")
+    @SecurityRequirement(name = "bearerAuth") // Indica que precisa de autenticação
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Audiência agendada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Requisição inválida - Verifique os dados enviados ou as regras de negócio (processo inativo, dia não útil, sobreposição)"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado - Token JWT inválido ou ausente"),
+            @ApiResponse(responseCode = "404", description = "Processo não encontrado com o ID informado")
+    })
     public ResponseEntity<AudienciaResponseDTO> agendarAudiencia(
             @PathVariable Long processoId,
             @Valid @RequestBody AudienciaRequestDTO dto) { // Recebe o DTO
