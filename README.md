@@ -80,8 +80,8 @@ Além dos requisitos solicitados, decidi implementar por conta própria a docker
   * **O que foi feito:** A aplicação foi dockerizada utilizando um `Dockerfile` multi-estágio otimizado. Este processo gera uma imagem Docker leve e segura, pronta para produção.
   * **Por quê:** Para garantir que a aplicação possa ser executada de forma consistente em qualquer ambiente que suporte Docker, facilitando o processo de build, deploy e escalabilidade, além de isolar a aplicação e suas dependências.
   * **Como usar:**
-    1. Construa a imagem Docker na raiz do projeto: `docker build -t gerenciador-processos .`
-    2. Execute o contêiner: `docker run -p 8080:8080 gerenciador-processos`
+    1. Construa a imagem Docker na raiz do projeto: `docker build -t judicialmanagement .`
+    2. Execute o contêiner: `docker run -p 8080:8080 --name api-judicial judicialmanagement`
 ---
 
 ## 🚀 Como Executar o Projeto
